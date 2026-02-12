@@ -11,7 +11,7 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
 
-        self.setWindowTitle("BIG API MAP - map_api.ui")
+        self.setWindowTitle("API")
         self.resize(900, 600)
 
         central_widget = QWidget()
