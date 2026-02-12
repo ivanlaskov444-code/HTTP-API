@@ -1,94 +1,72 @@
 import sys
-from io import BytesIO
-import requests
-from PIL import Image
-
-toponyms_to_find = [
-    "Воронеж",
-    "Санкт-Петербург",
-    "Новосибирск",
-    "Екатеринбург",
-    "Казань",
-    "Нижний Новгород",
-    "Красноярск",
-    "Челябинск",
-    "Самара",
-    "Ростов-на-Дону"
-]
-for city in toponyms_to_find:
-    geocoder_api_server = "http://geocode-maps.yandex.ru/1.x/"
-
-    geocoder_params = {
-        "apikey": "8013b162-6b42-4997-9691-77b7074026e0",
-        "geocode": city,
-        "format": "json"
-    }
-
-    response = requests.get(geocoder_api_server, params=geocoder_params)
-    print(f"Статус ответа: {response.status_code}")
-    print(f"Ответ: {response.text[:200]}")  # Печатаем первые 200 символов ответа
-
-    if response.status_code != 200:
-        print(f"Ошибка: {response.status_code}")
-        sys.exit(1)
-
-    json_response = response.json()
-
-    # Проверяем структуру ответа
-    print(f"Ключи в ответе: {list(json_response.keys())}")
-
-    # Если есть ошибка
-    if "error" in json_response:
-        print(f"Ошибка API: {json_response['error']}")
-        sys.exit(1)
-
-    # Проверяем наличие response
-    if "response" not in json_response:
-        print(f"Нет ключа 'response' в ответе. Структура ответа: {json_response}")
-        sys.exit(1)
-
-    # Получаем первый топоним из ответа геокодера.
-    toponym = json_response["response"]["GeoObjectCollection"]["featureMember"][0]["GeoObject"]
-    # Координаты центра топонима:
-    toponym_coodrinates = toponym["Point"]["pos"]
-    # Долгота и широта:
-    toponym_longitude, toponym_lattitude = toponym_coodrinates.split(" ")
-    print(f"Координаты: {toponym_longitude}, {toponym_lattitude}")
-
-    # Получаем размеры города (bounding box)
-    envelope = toponym["boundedBy"]["Envelope"]
-    lower_corner = envelope["lowerCorner"].split(" ")
-    upper_corner = envelope["upperCorner"].split(" ")
-
-    # Вычисляем размеры города
-    lon1, lat1 = float(lower_corner[0]), float(lower_corner[1])
-    lon2, lat2 = float(upper_corner[0]), float(upper_corner[1])
-
-    # Вычисляем общий размер города
-    city_width = abs(lon2 - lon1)
-    city_height = abs(lat2 - lat1)
+from PyQt6.QtWidgets import (
+    QApplication, QMainWindow, QWidget, QLabel, QLineEdit,
+    QPushButton, QSlider, QCheckBox, QRadioButton,
+    QVBoxLayout, QHBoxLayout, QGridLayout, QButtonGroup
+)
+from PyQt6.QtCore import Qt
 
 
-    delta_lon = city_width / 20
-    delta_lat = city_height / 20
+class MainWindow(QMainWindow):
+    def __init__(self):
+        super().__init__()
 
-    delta = "0.05"
-    apikey = "f3a0fe3a-b07e-4840-a1da-06f18b2ddf13"
+        self.setWindowTitle("BIG API MAP - map_api.ui")
+        self.resize(900, 600)
 
-    # Собираем параметры для запроса к StaticMapsAPI:
-    map_params = {
-        "ll": ",".join([toponym_longitude, toponym_lattitude]),
-        "spn": f"{delta_lon},{delta_lat}",
-        "apikey": apikey,
-        "size": "650,450"
-    }
+        central_widget = QWidget()
+        self.setCentralWidget(central_widget)
 
-    map_api_server = "https://static-maps.yandex.ru/v1"
-    response = requests.get(map_api_server, params=map_params)
+        main_layout = QVBoxLayout()
+        central_widget.setLayout(main_layout)
 
-    if response.status_code == 200:
-        im = BytesIO(response.content)
-        opened_image = Image.open(im)
-        opened_image.show()
-    else:
-        print(f"Ошибка StaticMaps API: {response.status_code}")
+        self.top_input = QLineEdit()
+        self.top_input.setPlaceholderText("Type Here")
+        main_layout.addWidget(self.top_input)
+
+        self.map_area = QLabel("TextLabel")
+        self.map_area.setStyleSheet("background-color: #e6e6e6; border: 1px solid gray;")
+        self.map_area.setMinimumHeight(400)
+        self.map_area.setAlignment(Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
+        main_layout.addWidget(self.map_area)
+
+
+
+        bottom_layout = QGridLayout()
+
+        self.index_checkbox = QCheckBox("Индекс")
+        bottom_layout.addWidget(self.index_checkbox, 0, 0)
+
+        self.search_input = QLineEdit()
+        bottom_layout.addWidget(self.search_input, 0, 1)
+
+        self.search_button = QPushButton("Искать")
+        bottom_layout.addWidget(self.search_button, 0, 2)
+
+        self.reset_button = QPushButton("Сброс")
+        bottom_layout.addWidget(self.reset_button, 1, 2)
+
+        self.radio_basic = QRadioButton("Базовая")
+        self.radio_transport = QRadioButton("Транспорт")
+        self.radio_auto = QRadioButton("Автомобильная")
+        self.radio_admin = QRadioButton("Административная")
+
+        bottom_layout.addWidget(self.radio_basic, 1, 0)
+        bottom_layout.addWidget(self.radio_transport, 1, 1)
+        bottom_layout.addWidget(self.radio_auto, 2, 0)
+        bottom_layout.addWidget(self.radio_admin, 2, 1)
+
+        self.radio_light = QRadioButton("Светлая")
+        self.radio_dark = QRadioButton("Темная")
+
+        bottom_layout.addWidget(self.radio_light, 0, 3)
+        bottom_layout.addWidget(self.radio_dark, 1, 3)
+
+        main_layout.addLayout(bottom_layout)
+
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    window = MainWindow()
+    window.show()
+    sys.exit(app.exec())
