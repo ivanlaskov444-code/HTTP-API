@@ -10,6 +10,7 @@ import requests
 from PIL import Image
 from PyQt6.QtGui import QPixmap, QImage
 import json
+import math
 
 
 class MainWindow(QMainWindow):
@@ -332,7 +333,20 @@ class MainWindow(QMainWindow):
                 coords = org["geometry"]["coordinates"]
                 org_lon, org_lat = coords[0], coords[1]
 
-                distance = self.calculate_distance(click_lon, click_lat, org_lon, org_lat)
+                R = 6371000
+
+                lat1_rad = math.radians(lat1)
+                lon1_rad = math.radians(lon1)
+                lat2_rad = math.radians(lat2)
+                lon2_rad = math.radians(lon2)
+
+                dlat = lat2_rad - lat1_rad
+                dlon = lon2_rad - lon1_rad
+
+                a = math.sin(dlat / 2) ** 2 + math.cos(lat1_rad) * math.cos(lat2_rad) * math.sin(dlon / 2) ** 2
+                c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+
+                distance = R * c
 
                 if distance <= 50:
                     address = org["properties"]["CompanyMetaData"]["address"]
@@ -346,6 +360,9 @@ class MainWindow(QMainWindow):
                     self.static_current_lat = org_lat
                     self.show_marker = True
                     self.update_map()
+        else:
+            print(response2.status_code)
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
