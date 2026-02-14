@@ -127,7 +127,7 @@ class MainWindow(QMainWindow):
         if query:
             geocoder_api_server = "http://geocode-maps.yandex.ru/1.x/"
             geocoder_params = {
-                "apikey": "8013b162-6b42-4997-9691-77b7074026e0",
+                "apikey": "",
                 "geocode": query,
                 "format": "json"
             }
@@ -174,7 +174,7 @@ class MainWindow(QMainWindow):
 
 
     def update_map(self):
-        apikey = "....."
+        apikey = ""
         map_params = {
             "ll": f"{self.current_lon},{self.current_lat}",
             "spn": f"{self.current_delta},{self.current_delta}",
@@ -206,16 +206,16 @@ class MainWindow(QMainWindow):
             self.current_delta += 0.01
             self.update_map()
 
-        elif key == Qt.Key.Key_Left:
+        elif key == Qt.Key.Key_8:
             self.current_lon = float(self.current_lon) - self.current_delta / 2
             self.update_map()
-        elif key == Qt.Key.Key_Right:
+        elif key == Qt.Key.Key_5:
             self.current_lon = float(self.current_lon) + self.current_delta / 2
             self.update_map()
-        elif key == Qt.Key.Key_Up:
+        elif key == Qt.Key.Key_4:
             self.current_lat = float(self.current_lat) + self.current_delta
             self.update_map()
-        elif key == Qt.Key.Key_Down:
+        elif key == Qt.Key.Key_6:
             self.current_lat = float(self.current_lat) - self.current_delta
             self.update_map()
 
@@ -266,9 +266,9 @@ class MainWindow(QMainWindow):
 
 
     def geocode___(self, click_lon, click_lat):
-        geocoder_api_server = "....."
+        geocoder_api_server = "http://geocode-maps.yandex.ru/1.x/"
         geocoder_params = {
-            "apikey": "8013b162-6b42-4997-9691-77b7074026e0",
+            "apikey": "",
             "geocode": f"{click_lon},{click_lat}",
             "format": "json"
         }
@@ -309,7 +309,7 @@ class MainWindow(QMainWindow):
         self.update_map()
 
     def geocode_____(self, click_lon, click_lat):
-        api_key = '....'
+        api_key = ''
         server_address = "https://search-maps.yandex.ru/v1/"
 
         params = {
