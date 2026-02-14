@@ -108,11 +108,11 @@ class MainWindow(QMainWindow):
         if self.radio_basic.isChecked():
             self.map_type = "map"
         elif self.radio_transport.isChecked():
-            self.map_type = ""
+            self.map_type = "transit"
         elif self.radio_auto.isChecked():
-            self.map_type = ""
+            self.map_type = "driving"
         elif self.radio_admin.isChecked():
-            self.map_type = ""
+            self.map_type = "admin"
         self.update_map()
 
     def black(self):
@@ -182,7 +182,7 @@ class MainWindow(QMainWindow):
             "apikey": apikey,
             "size": "650,450",
             "theme": self.theme,
-            "l": self.map_type
+            "maptype": self.map_type
         }
         if  not self.show_marker:
             map_params["pt"] = f"{self.static_current_lon},{self.static_current_lat},pm2rdm"
